@@ -25,6 +25,8 @@ io.on('connection', (client) => {
         users.addPerson(client.id, user.name, user.chatroom);
 
         client.broadcast.to(user.chatroom).emit('listPersons', users.getPersonsInChatroom(user.chatroom));
+        client.broadcast.to(user.chatroom).emit('createMessage', createMessage('Admin', `${user.name} has joined`));
+
 
         callback(users.getPersonsInChatroom(user.chatroom));
 
@@ -38,11 +40,13 @@ io.on('connection', (client) => {
 
     });
 
-    client.on('createMessage', (data) => {
+    client.on('createMessage', (data, callback) => {
         let person = users.getPerson(client.id);
         let message = createMessage(person.name, data.message);
-        console.log(message);
+
         client.broadcast.to(person.chatroom).emit('createMessage', message);
+
+        callback(message);
     });
 
     //Direct message
